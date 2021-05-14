@@ -27,6 +27,10 @@ public class SplineManager : MonoBehaviour
 
     public int resolution=10;
 
+    public bool showAnchors;
+
+    public bool anchorsMirrored;
+
 
 
     // Start is called before the first frame update
@@ -122,7 +126,7 @@ public class SplineManager : MonoBehaviour
             {
                 //add anchor
 
-               Dots[i].AnchorForward = Instantiate(Anchorsfab, Dots[i].transform.position+(Dots[i+1].transform.position-Dots[i].transform.position).normalized* defaultMagnitude, Quaternion.identity);
+               Dots[i].SetAnchor(Instantiate(Anchorsfab, Dots[i].transform.position+(Dots[i+1].transform.position-Dots[i].transform.position).normalized* defaultMagnitude, Quaternion.identity),1);
 
 
                 Dots[i].SegmentForward = Instantiate(Segmentsfab);
@@ -131,15 +135,16 @@ public class SplineManager : MonoBehaviour
             else if (i == DotsGO.Count-1)
             {
                 //add anchor
-                Dots[i].AnchorBack  = Instantiate(Anchorsfab, Dots[i].transform.position + (Dots[i  - 1].transform.position- Dots[i].transform.position).normalized*defaultMagnitude, Quaternion.identity);
+                Dots[i].SetAnchor(Instantiate(Anchorsfab, Dots[i].transform.position + (Dots[i  - 1].transform.position- Dots[i].transform.position).normalized*defaultMagnitude, Quaternion.identity),-1);
 
                 Dots[i].SegmentBack = prevSeg;
     
             }
             else
             {
-                Dots[i].AnchorForward = Instantiate(Anchorsfab, Dots[i].transform.position + (Dots[i + 1].transform.position - Dots[i - 1].transform.position).normalized*defaultMagnitude, Quaternion.identity);
-                Dots[i].AnchorBack = Instantiate(Anchorsfab, Dots[i].transform.position + (Dots[i - 1].transform.position - Dots[i + 1].transform.position).normalized* defaultMagnitude , Quaternion.identity);
+                Dots[i].SetAnchor(Instantiate(Anchorsfab, Dots[i].transform.position + (Dots[i + 1].transform.position - Dots[i - 1].transform.position).normalized*defaultMagnitude, Quaternion.identity),1);
+
+                Dots[i].SetAnchor(Instantiate(Anchorsfab, Dots[i].transform.position + (Dots[i - 1].transform.position - Dots[i + 1].transform.position).normalized* defaultMagnitude , Quaternion.identity),-1);
 
                 Dots[i].SegmentForward = Instantiate(Segmentsfab);
                 SegmentsGO.Add(Dots[i].SegmentForward);
@@ -172,8 +177,27 @@ public class SplineManager : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.Space))
         {
-            AutoAnchors();
+            //AutoAnchors();
             DrawBezier();
         }
+
+        if (Input.GetKeyDown(KeyCode.J))
+        {
+            foreach (var item in Dots)
+            {
+                item.HideAnchors();
+            }
+
+        }
+
+        if(Input.GetKeyDown(KeyCode.L))
+        {
+            foreach (var item in Dots)
+            {
+                item.ShowAnchors();
+            }
+        }
     }
+
+
 }
