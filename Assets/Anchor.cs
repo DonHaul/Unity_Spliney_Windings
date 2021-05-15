@@ -4,35 +4,113 @@ using UnityEngine;
 
 public class Anchor : MonoBehaviour
 {
-    public Dot dot;
+    public Handle HandleBack;
+    public Handle HandleForward;
 
-    LineRenderer lr;
+    public Segment SegmentBack;
+    public Segment SegmentForward;
 
-    // Update is called once per frame
-    void Awake()
+
+    bool rerender = false;
+
+    private void OnDrawGizmos()
     {
-        lr= GetComponent<LineRenderer>();
+        Gizmos.color = Color.red;
+
+
+        if(HandleBack != null)
+        Gizmos.DrawLine(transform.position, HandleBack.transform.position);
+
+        if(HandleForward != null)
+            Gizmos.DrawLine(transform.position, HandleForward.transform.position);
+
     }
-    private void On()
+
+    public void SetAnchor(GameObject handle, int dir=1)
     {
-        Debug.Log("Mouse Click");
+        if(dir==1)
+        {
+            HandleForward = handle.GetComponent<Handle>();
+        }
+        else if(dir==-1)
+        {
+            HandleBack = handle.GetComponent<Handle>(); 
+        }
+        else
+        {
+            Debug.LogError("This dir is invalid");
+        }
+
+
+
+        //set corrresponding dot
+        handle.GetComponent<Handle>().dot = this;
+        handle.GetComponent<Handle>().RenderLine();
+    }
+
+    public void ShowAnchors()
+    {
+        if (HandleBack != null)
+        {
+            HandleBack.gameObject.SetActive(true);
+        }
+
+        if (HandleForward != null)
+        {
+            HandleForward.gameObject.SetActive(true);
+        }
+    }
+
+
+    public void HideAnchors()
+    {
+        if (HandleBack != null)
+        {
+            HandleBack.gameObject.SetActive(false);
+        }
+
+        if (HandleForward != null)
+        {
+            HandleForward.gameObject.SetActive(false);
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        
     }
 
     private void OnMouseDrag()
     {
-        transform.position = Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition),new Vector3(1,1,0));
 
-        RenderLine();
- 
+        transform.position = Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0));
+
+        //rerender handle lines
+        if(HandleForward!=null)
+        {
+            HandleForward.RenderLine();
+            SegmentForward.RenderBezier();
+        }
+
+        if (HandleBack != null)
+        {
+            HandleBack.RenderLine();
+            SegmentBack.RenderBezier();
+        }
+               
     }
 
-    public void RenderLine()
+    public void RenderBezierByHandle(Handle h)
     {
-        
+        if (h==HandleForward)
+        {
+            SegmentForward.RenderBezier();
+        }
 
-        lr.positionCount = 2;
-        lr.SetPosition(0, dot.transform.position);
-
-        lr.SetPosition(1, transform.position);
+        if (h == HandleBack)
+        {
+            SegmentBack.RenderBezier();
+        }
     }
+
 }
