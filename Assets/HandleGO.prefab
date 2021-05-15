@@ -14,8 +14,8 @@ GameObject:
   - component: {fileID: -4459967496562605864}
   - component: {fileID: 6489463235643567539}
   m_Layer: 0
-  m_Name: AnchorsGO
-  m_TagString: Dot
+  m_Name: HandleGO
+  m_TagString: Anchor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -95,6 +95,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5fe4af8639959b4388f9432553c15ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dot: {fileID: 0}
 --- !u!120 &-4459967496562605864
 LineRenderer:
   m_ObjectHideFlags: 0

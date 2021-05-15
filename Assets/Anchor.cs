@@ -80,7 +80,7 @@ public class Anchor : MonoBehaviour
         
     }
 
-    private void OnMouseDrag()
+   /* private void OnMouseDrag()
     {
 
         transform.position = Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0));
@@ -100,7 +100,7 @@ public class Anchor : MonoBehaviour
             SegmentBack.RenderBezier();
         }
                
-    }
+    }*/
 
     public void RenderBezierByHandle(Handle h)
     {

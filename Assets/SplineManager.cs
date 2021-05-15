@@ -30,6 +30,7 @@ public class SplineManager : MonoBehaviour
     public bool anchorsOn;
     public bool isCreating;
     public bool isHandling;
+    public bool isMiddle;
 
     public bool anchorsMirrored;
 
@@ -214,10 +215,53 @@ public class SplineManager : MonoBehaviour
         if (ActiveTool==Tool.SplineTool)
         {
             //create
-            if (Input.GetMouseButtonDown(0) && !(Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.LeftAlt) ))
+            if (Input.GetMouseButtonDown(0) )
             {
-                CreateAnchor(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
-                isCreating = true;
+                if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.LeftAlt))
+                    {
+                    //CreateAnchor(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
+                    //isCreating = true;
+                    Debug.Log("Alt + Click");
+
+                    Collider2D col = Physics2D.OverlapPoint(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
+
+                    Debug.Log(col);
+                    isHandling = true;
+
+                    activeHandle = col.gameObject.GetComponent<Handle>();
+
+                }
+                else
+                {
+
+
+                    Collider2D col = Physics2D.OverlapPoint(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
+                    Debug.Log(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
+                    Debug.Log(col);
+                    if(col!=null && col.tag=="Dot")
+                    {
+                        Debug.Log("Dot to remove");
+                        RemoveAnchor(col.GetComponent<Anchor>());
+                    }
+                    else if (col != null && col.tag == "Segment")
+                    {
+                        Debug.Log("Dot to Add");
+                        CreateAnchorAtSeg(col.gameObject.GetComponent<Segment>(), Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
+
+                        isCreating = true;
+                        isMiddle = true;
+
+                    }
+                    else
+                    { 
+                    CreateAnchor(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
+                        isCreating = true;
+                        
+                    }
+
+
+
+                }
 
             }
             //reset
@@ -225,24 +269,13 @@ public class SplineManager : MonoBehaviour
             {
                 isCreating = false;
                 isHandling = false;
+                isMiddle = false;
+
+                activeAnchor = Dots[Dots.Count - 1];
             }
 
 
-            //replace to ray thin overlap point
-            if (Input.GetMouseButtonDown(0) && (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.LeftAlt)))
-            {
-                //CreateAnchor(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
-                //isCreating = true;
-                Debug.Log("Alt + Click");
-
-                Collider2D col = Physics2D.OverlapPoint(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
-
-                Debug.Log(col);
-                isHandling = true;
-
-                activeHandle = col.gameObject.GetComponent<Handle>();
-
-            }
+  
 
             //drag after create
             if (Input.GetMouseButton(0))
@@ -257,7 +290,18 @@ public class SplineManager : MonoBehaviour
                 activeAnchor.HandleBack.transform.position = activeAnchor.transform.position - (activeAnchor.HandleForward.transform.position - activeAnchor.transform.position);
                 activeAnchor.HandleBack.RenderLine();
 
-                activeAnchor.SegmentBack.RenderBezier();            }
+                activeAnchor.SegmentBack.RenderBezier();
+
+
+
+                    if(isMiddle)
+                    {
+                        activeAnchor.SegmentForward.RenderBezier();
+                    }
+
+
+
+                }
                 else if(isHandling)
                 {
                     if(activeHandle!=null)
@@ -270,6 +314,52 @@ public class SplineManager : MonoBehaviour
 
         }
         }
+    }
+
+    public void CreateAnchorAtSeg(Segment seg,Vector2 pos)
+    {
+
+        Anchor a = Instantiate(Anchorfab, pos, Quaternion.identity).GetComponent<Anchor>();
+
+        
+
+        Dots.Insert(Dots.IndexOf(seg.anchorback),a);
+        //a.SetupAnchor()
+
+        //a.HideAnchors();
+
+        a.SetHandle(Instantiate(Handlefab, a.transform.position, Quaternion.identity), 1);
+
+        a.SetHandle(Instantiate(Handlefab, a.transform.position, Quaternion.identity), -1);
+
+        //update last segment
+        //activeAnchor.SegmentForward.SetSegment(activeAnchor, a);
+
+        //sticth to last segment;
+        //a.SegmentBack = activeAnchor.SegmentForward;
+
+
+        a.SegmentBack = Instantiate(Segmentsfab).GetComponent<Segment>();
+
+
+
+        a.SegmentBack.SetSegment(seg.anchorback, a);
+        a.SegmentBack.RenderBezier();
+        a.SegmentBack.SetupCollider();
+
+
+        //connect previous to this
+        a.SegmentBack.anchorback.SegmentForward = a.SegmentBack;
+
+        activeAnchor = a;
+
+
+        a.SegmentForward = seg;
+        a.SegmentForward.anchorback = a;
+
+        a.SegmentForward.RenderBezier();
+        a.SegmentForward.SetupCollider();
+
     }
 
     public void CreateAnchor(Vector2 pos)
@@ -294,12 +384,56 @@ public class SplineManager : MonoBehaviour
 
         a.SegmentBack = Instantiate(Segmentsfab).GetComponent<Segment>();
 
+
+
         a.SegmentBack.SetSegment(activeAnchor, a);
         a.SegmentBack.RenderBezier();
+        a.SegmentBack.SetupCollider();
 
+
+        //connect previous to this
+        a.SegmentBack.anchorback.SegmentForward = a.SegmentBack;
 
         activeAnchor = a;
 
+    }
+
+    public void RemoveAnchor(Anchor a)
+    {
+        //attach previous to next
+
+        //if not last point
+        if(a.SegmentForward!=null)
+        { 
+        a.SegmentBack.anchorforward = a.SegmentForward.anchorforward;
+            a.SegmentBack.RenderBezier();
+            Destroy(a.SegmentForward.gameObject);
+
+            //connect previous to this;
+            a.SegmentForward.anchorforward.SegmentBack = a.SegmentBack;
+        }
+
+        //if last element
+        if(Dots.IndexOf(a)==Dots.Count-1)
+        {
+            //set activeAncor to previous
+            activeAnchor = Dots[Dots.Count - 2];
+
+            //remove line
+            Destroy(a.SegmentBack.gameObject);
+
+        
+        }
+
+        //delete it self
+        Dots.Remove(a);
+        
+
+        
+        Destroy(a.HandleBack.gameObject);
+        Destroy(a.HandleForward.gameObject);
+
+        Destroy(a.gameObject);
     }
 
 

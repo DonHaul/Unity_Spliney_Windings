@@ -92,8 +92,8 @@ GameObject:
   - component: {fileID: 1585208319155127319}
   - component: {fileID: -8527245656150089464}
   m_Layer: 0
-  m_Name: Dot
-  m_TagString: Untagged
+  m_Name: Anchor
+  m_TagString: Dot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -173,8 +173,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4229ec6cc0843ae4290c4c9efd947d1c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AnchorBack: {fileID: 0}
-  AnchorForward: {fileID: 0}
+  HandleBack: {fileID: 0}
+  HandleForward: {fileID: 0}
   SegmentBack: {fileID: 0}
   SegmentForward: {fileID: 0}
 --- !u!58 &-8527245656150089464
