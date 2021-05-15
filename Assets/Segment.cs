@@ -16,6 +16,9 @@ public class Segment : MonoBehaviour
     {
         anchorback= back;
         anchorforward = forward;
+
+        anchorback.SegmentForward = this;
+        anchorforward.SegmentBack = this;
     }
 
     // Start is called before the first frame update

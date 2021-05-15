@@ -28,6 +28,7 @@ public class SplineManager : MonoBehaviour
     public int resolution=10;
 
     public bool anchorsOn;
+    public bool splineCloseOn=false;
     public bool isCreating;
     public bool isHandling;
     public bool isMiddle;
@@ -41,6 +42,9 @@ public class SplineManager : MonoBehaviour
 
     Anchor activeAnchor;
     Handle activeHandle;
+
+    Vector2 backB4;
+    Vector2 forwardB4;
 
 
     // Start is called before the first frame update
@@ -211,6 +215,14 @@ public class SplineManager : MonoBehaviour
             ActiveTool = Tool.None;
         }
 
+        if(Input.GetKeyDown(KeyCode.C))
+        {
+            splineCloseOn = !splineCloseOn;
+            
+           
+            ToggleSplineClose(splineCloseOn);
+        }
+
         
         if (ActiveTool==Tool.SplineTool)
         {
@@ -316,6 +328,38 @@ public class SplineManager : MonoBehaviour
         }
     }
 
+    public void ToggleSplineClose(bool isOn)
+    {
+        if(isOn)
+        {
+
+            //turn all this into function
+            Dots[0].SegmentBack = Instantiate(Segmentsfab).GetComponent<Segment>();
+
+            Dots[0].SegmentBack.SetSegment(Dots[Dots.Count - 1], Dots[0]);
+
+            backB4 = Dots[0].HandleBack.transform.position;
+            forwardB4 = Dots[Dots.Count - 1].HandleForward.transform.position;
+
+            //smoothing
+            Dots[0].HandleBack.transform.position = ((Dots[0].HandleBack.transform.position - Dots[0].transform.position) + (Dots[Dots.Count - 1].transform.position - Dots[0].transform.position)) / 2 + Dots[0].transform.position;
+            Dots[Dots.Count - 1].HandleForward.transform.position = ((Dots[Dots.Count - 1].HandleForward.transform.position - Dots[Dots.Count - 1].transform.position) + (Dots[0].transform.position - Dots[Dots.Count - 1].transform.position)) / 2 + Dots[Dots.Count - 1].transform.position;
+
+            Dots[0].HandleBack.RenderLine();
+            Dots[Dots.Count - 1].HandleForward.RenderLine();
+
+            Dots[0].SegmentBack.RenderBezier();
+        }
+        else
+        {
+            Destroy(Dots[0].SegmentBack.gameObject);
+            Dots[0].HandleBack.transform.position = backB4;
+            Dots[Dots.Count - 1].HandleForward.transform.position = forwardB4;
+            Dots[0].HandleBack.RenderLine();
+            Dots[Dots.Count - 1].HandleForward.RenderLine();
+        }
+    }
+
     public void CreateAnchorAtSeg(Segment seg,Vector2 pos)
     {
 
@@ -365,6 +409,11 @@ public class SplineManager : MonoBehaviour
     public void CreateAnchor(Vector2 pos)
     {
 
+        if (splineCloseOn)
+        {Destroy(Dots[0].SegmentBack.gameObject);
+
+        }
+
         Anchor a = Instantiate(Anchorfab, pos, Quaternion.identity).GetComponent<Anchor>();
         Dots.Add(a);
         //a.SetupAnchor()
@@ -396,6 +445,10 @@ public class SplineManager : MonoBehaviour
 
         activeAnchor = a;
 
+        if(splineCloseOn)
+        { 
+        ToggleSplineClose(splineCloseOn);
+    }
     }
 
     public void RemoveAnchor(Anchor a)
