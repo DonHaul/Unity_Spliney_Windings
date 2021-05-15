@@ -234,7 +234,9 @@ MonoBehaviour:
   - {fileID: 719471076}
   - {fileID: 1437960627}
   - {fileID: 72563292}
-  Anchorsfab: {fileID: 8291016642895196230, guid: 3dfb39174f271b14a9095b67a2b081b6,
+  Anchorfab: {fileID: 2370654393150167407, guid: 534f1efc29f3b4247ac1cf2b55304c6c,
+    type: 3}
+  Handlefab: {fileID: 8291016642895196230, guid: 3dfb39174f271b14a9095b67a2b081b6,
     type: 3}
   Segmentsfab: {fileID: 5675302033674091732, guid: 292092cafbf5aff4492cd8afd4d32940,
     type: 3}
@@ -243,9 +245,12 @@ MonoBehaviour:
   lrs: []
   Dots: []
   step: 0.1
-  resolution: 5
-  showAnchors: 0
+  resolution: 20
+  anchorsOn: 0
+  isCreating: 0
+  isHandling: 0
   anchorsMirrored: 0
+  ActiveTool: 1
 --- !u!120 &239791606
 LineRenderer:
   m_ObjectHideFlags: 0

@@ -20,6 +20,8 @@ public class Handle : MonoBehaviour
 
     private void OnMouseDrag()
     {
+        if(SplineManager.instance.ActiveTool != SplineManager.Tool.SplineTool)
+
         transform.position = Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition),new Vector3(1,1,0));
 
         RenderLine();

@@ -26,7 +26,7 @@ public class Anchor : MonoBehaviour
 
     }
 
-    public void SetAnchor(GameObject handle, int dir=1)
+    public void SetHandle(GameObject handle, int dir=1)
     {
         if(dir==1)
         {
@@ -85,16 +85,18 @@ public class Anchor : MonoBehaviour
 
         transform.position = Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0));
 
+        HandleForward.RenderLine();
+        HandleBack.RenderLine();
         //rerender handle lines
-        if(HandleForward!=null)
+        if (SegmentForward != null)
         {
-            HandleForward.RenderLine();
+            
             SegmentForward.RenderBezier();
         }
 
-        if (HandleBack != null)
+        if (SegmentBack != null)
         {
-            HandleBack.RenderLine();
+            
             SegmentBack.RenderBezier();
         }
                
@@ -102,12 +104,12 @@ public class Anchor : MonoBehaviour
 
     public void RenderBezierByHandle(Handle h)
     {
-        if (h==HandleForward)
+        if (h==HandleForward && SegmentForward!= null)
         {
             SegmentForward.RenderBezier();
         }
 
-        if (h == HandleBack)
+        if (h == HandleBack && SegmentBack!=null)
         {
             SegmentBack.RenderBezier();
         }
