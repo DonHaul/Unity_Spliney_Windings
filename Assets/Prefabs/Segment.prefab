@@ -49,6 +49,7 @@ MonoBehaviour:
   anchorback: {fileID: 0}
   lr: {fileID: 0}
   ec: {fileID: 0}
+  v: []
 --- !u!120 &449985119350285211
 LineRenderer:
   m_ObjectHideFlags: 0
@@ -95,8 +96,8 @@ LineRenderer:
       serializedVersion: 2
       m_Curve:
       - serializedVersion: 3
-        time: 0.012256622
-        value: 0.20108986
+        time: 0
+        value: 0.1439457
         inSlope: 0
         outSlope: 0
         tangentMode: 0

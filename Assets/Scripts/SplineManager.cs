@@ -27,24 +27,18 @@ public class SplineManager : MonoBehaviour
 
     public int resolution=10;
 
-    public bool anchorsOn;
-    public bool splineCloseOn=false;
-    public bool isCreating;
-    public bool isHandling;
-    public bool isMiddle;
-
-    public bool anchorsMirrored;
+    
 
     [SerializeField]
-    public enum Tool { SplineTool, None };
+    Vector2 camerabounds;
 
-    public Tool ActiveTool=Tool.None;
 
-    Anchor activeAnchor;
-    Handle activeHandle;
+
 
     Vector2 backB4;
     Vector2 forwardB4;
+    
+
 
 
     // Start is called before the first frame update
@@ -83,7 +77,7 @@ public class SplineManager : MonoBehaviour
         AutoHandles();
         DrawBezier();
 
-        activeAnchor = Dots[Dots.Count - 1];
+        ControlsManager.instance.ActiveAnchor = Dots[Dots.Count - 1];
     }
 
 
@@ -97,7 +91,7 @@ public class SplineManager : MonoBehaviour
 
     }
 
-    private void DrawBezier()
+    public  void DrawBezier()
     {
         for (int i = 0; i < Dots.Count-1; i++)
         {
@@ -106,25 +100,29 @@ public class SplineManager : MonoBehaviour
         
 
     }
-    /*
-    void DeleteAnchors()
+    
+    public void DeleteAnchors()
     {
-        for (int i = 0; i < AnchorsGO.Count; i++)
+        for (int i = 0; i < Dots.Count; i++)
         {
-            Destroy(AnchorsGO[i]);
+            Dots[i].Destroy();
+
         }
 
-        AnchorsGO.Clear();
-    }*/
+        Dots.Clear();
+    }
 
+    /// <summary>
+    /// Generate Handles for a set of Anchors
+    /// </summary>
     void AutoHandles()
     {
 
-        //DeleteAnchors();
 
         Segment prevSeg = null;
 
 
+        //for every anchor
         for (int i = 0; i < Dots.Count; i++)
         {
             if(i==0)
@@ -176,157 +174,6 @@ public class SplineManager : MonoBehaviour
 
 
 
-    private void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            //AutoAnchors();
-            DrawBezier();
-        }
-
-        if (Input.GetKeyDown(KeyCode.J))
-        {
-
-            anchorsOn = !anchorsOn;
-
-            if (anchorsOn)
-            {
-                foreach (var item in Dots)
-                {
-                    item.ShowAnchors();
-                }
-            }
-            else
-            { 
-            foreach (var item in Dots)
-            {
-                item.HideAnchors();
-            }
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            ActiveTool = Tool.SplineTool;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            ActiveTool = Tool.None;
-        }
-
-        if(Input.GetKeyDown(KeyCode.C))
-        {
-            splineCloseOn = !splineCloseOn;
-            
-           
-            ToggleSplineClose(splineCloseOn);
-        }
-
-        
-        if (ActiveTool==Tool.SplineTool)
-        {
-            //create
-            if (Input.GetMouseButtonDown(0) )
-            {
-                if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.LeftAlt))
-                    {
-                    //CreateAnchor(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
-                    //isCreating = true;
-                    Debug.Log("Alt + Click");
-
-                    Collider2D col = Physics2D.OverlapPoint(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
-
-                    Debug.Log(col);
-                    isHandling = true;
-
-                    activeHandle = col.gameObject.GetComponent<Handle>();
-
-                }
-                else
-                {
-
-
-                    Collider2D col = Physics2D.OverlapPoint(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
-                    Debug.Log(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
-                    Debug.Log(col);
-                    if(col!=null && col.tag=="Dot")
-                    {
-                        Debug.Log("Dot to remove");
-                        RemoveAnchor(col.GetComponent<Anchor>());
-                    }
-                    else if (col != null && col.tag == "Segment")
-                    {
-                        Debug.Log("Dot to Add");
-                        CreateAnchorAtSeg(col.gameObject.GetComponent<Segment>(), Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
-
-                        isCreating = true;
-                        isMiddle = true;
-
-                    }
-                    else
-                    { 
-                    CreateAnchor(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
-                        isCreating = true;
-                        
-                    }
-
-
-
-                }
-
-            }
-            //reset
-            if (Input.GetMouseButtonUp(0))
-            {
-                isCreating = false;
-                isHandling = false;
-                isMiddle = false;
-
-                activeAnchor = Dots[Dots.Count - 1];
-            }
-
-
-  
-
-            //drag after create
-            if (Input.GetMouseButton(0))
-            {
-
-                if(isCreating)
-                { 
-                activeAnchor.HandleForward.transform.position = Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0));
-                activeAnchor.HandleForward.RenderLine();
-
-                //mirror handle
-                activeAnchor.HandleBack.transform.position = activeAnchor.transform.position - (activeAnchor.HandleForward.transform.position - activeAnchor.transform.position);
-                activeAnchor.HandleBack.RenderLine();
-
-                activeAnchor.SegmentBack.RenderBezier();
-
-
-
-                    if(isMiddle)
-                    {
-                        activeAnchor.SegmentForward.RenderBezier();
-                    }
-
-
-
-                }
-                else if(isHandling)
-                {
-                    if(activeHandle!=null)
-                    {
-                        activeHandle.transform.position = Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0));
-                        activeHandle.dot.RenderBezierByHandle(activeHandle);
-                        activeHandle.RenderLine();
-                    }
-                }
-
-        }
-        }
-    }
 
     public void ToggleSplineClose(bool isOn)
     {
@@ -395,7 +242,8 @@ public class SplineManager : MonoBehaviour
         //connect previous to this
         a.SegmentBack.anchorback.SegmentForward = a.SegmentBack;
 
-        activeAnchor = a;
+
+        ControlsManager.instance.ActiveAnchor = a;
 
 
         a.SegmentForward = seg;
@@ -409,12 +257,12 @@ public class SplineManager : MonoBehaviour
     public void CreateAnchor(Vector2 pos)
     {
 
-        if (splineCloseOn)
+        if (ControlsManager.instance.SplineCloseOn)
         {Destroy(Dots[0].SegmentBack.gameObject);
 
         }
 
-        Anchor a = Instantiate(Anchorfab, pos, Quaternion.identity).GetComponent<Anchor>();
+        Anchor a = Instantiate(Anchorfab,new Vector3 (pos.x,pos.y,-1f), Quaternion.identity).GetComponent<Anchor>();
         Dots.Add(a);
         //a.SetupAnchor()
 
@@ -435,7 +283,7 @@ public class SplineManager : MonoBehaviour
 
 
 
-        a.SegmentBack.SetSegment(activeAnchor, a);
+        a.SegmentBack.SetSegment(ControlsManager.instance.ActiveAnchor, a);
         a.SegmentBack.RenderBezier();
         a.SegmentBack.SetupCollider();
 
@@ -443,12 +291,12 @@ public class SplineManager : MonoBehaviour
         //connect previous to this
         a.SegmentBack.anchorback.SegmentForward = a.SegmentBack;
 
-        activeAnchor = a;
+        ControlsManager.instance.ActiveAnchor = a;
 
-        if(splineCloseOn)
+        if(ControlsManager.instance.SplineCloseOn)
         { 
-        ToggleSplineClose(splineCloseOn);
-    }
+        ToggleSplineClose(ControlsManager.instance.SplineCloseOn);
+        }
     }
 
     public void RemoveAnchor(Anchor a)
@@ -470,7 +318,7 @@ public class SplineManager : MonoBehaviour
         if(Dots.IndexOf(a)==Dots.Count-1)
         {
             //set activeAncor to previous
-            activeAnchor = Dots[Dots.Count - 2];
+            ControlsManager.instance.ActiveAnchor = Dots[Dots.Count - 2];
 
             //remove line
             Destroy(a.SegmentBack.gameObject);
@@ -487,6 +335,39 @@ public class SplineManager : MonoBehaviour
         Destroy(a.HandleForward.gameObject);
 
         Destroy(a.gameObject);
+    }
+
+    public void Generate()
+    {
+        int amount = Random.Range(3, 9);
+
+        GameObject go;
+        Vector2 pos;
+
+        //delete previous anchors
+        DeleteAnchors();
+
+        
+        //generatenew anchors
+        for (int i = 0; i < amount; i++)
+        {
+
+
+            //generate random positions
+            pos = new Vector3(Random.Range(-camerabounds.x, camerabounds.x), Random.Range(-camerabounds.y, camerabounds.y),-1f);
+
+
+            go = Instantiate(Anchorfab, pos, Quaternion.identity);
+
+            Dots.Add(go.GetComponent<Anchor>());
+        }
+
+        //generate handles for the current anchors
+        AutoHandles();
+
+        //render lines
+        DrawBezier();
+        
     }
 
 

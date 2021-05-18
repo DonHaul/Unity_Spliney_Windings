@@ -75,32 +75,21 @@ public class Anchor : MonoBehaviour
         }
     }
 
-    private void FixedUpdate()
+
+    public void Destroy()
     {
-        
+        if(SegmentBack !=null)
+        {
+            Destroy(SegmentBack.gameObject);
+        }
+        if(SegmentForward !=null)
+        {
+            Destroy(SegmentForward.gameObject);
+        }
+        Destroy(HandleBack.gameObject);
+        Destroy(HandleForward.gameObject);
+        Destroy(gameObject);
     }
-
-   /* private void OnMouseDrag()
-    {
-
-        transform.position = Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0));
-
-        HandleForward.RenderLine();
-        HandleBack.RenderLine();
-        //rerender handle lines
-        if (SegmentForward != null)
-        {
-            
-            SegmentForward.RenderBezier();
-        }
-
-        if (SegmentBack != null)
-        {
-            
-            SegmentBack.RenderBezier();
-        }
-               
-    }*/
 
     public void RenderBezierByHandle(Handle h)
     {
@@ -113,6 +102,32 @@ public class Anchor : MonoBehaviour
         {
             SegmentBack.RenderBezier();
         }
+    }
+
+    public void UpdatePosition(Vector2 pos)
+    {
+        transform.position = new Vector3(pos.x, pos.y, -1f);
+
+        if (SegmentBack != null)
+        {
+            SegmentBack.RenderBezier();
+        }
+        if (SegmentForward != null)
+        {
+            SegmentForward.RenderBezier();
+        }
+
+        if (HandleForward != null)
+        {
+            HandleForward.RenderLine();
+        }
+
+        if (HandleBack != null)
+        {
+            HandleBack.RenderLine();
+        }
+
+
     }
 
 }

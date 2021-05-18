@@ -12,6 +12,8 @@ public class Segment : MonoBehaviour
     public LineRenderer lr;
     public EdgeCollider2D ec;
 
+    public Vector2[] v;
+
     public void SetSegment(Anchor back,Anchor forward)
     {
         anchorback= back;
@@ -36,7 +38,7 @@ public class Segment : MonoBehaviour
 
         int resolution = SplineManager.instance.resolution;
 
-        Vector2[] v = new Vector2[resolution+1];
+        v = new Vector2[resolution+1];
         Vector3[] v3 = new Vector3[resolution+1];
 
         lr.positionCount =  resolution + 1;
