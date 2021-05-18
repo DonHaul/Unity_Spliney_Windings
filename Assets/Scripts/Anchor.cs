@@ -2,30 +2,32 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/// <summary>
+/// Anchors are the points the segments connect to.
+/// Each segment has 2 segments one back and one forward
+/// and two handle (back and forward) that influence the corresponding segments
+/// </summary>
 public class Anchor : MonoBehaviour
 {
-    public Handle HandleBack;
-    public Handle HandleForward;
+    [SerializeField]
+    private Handle handleBack;
+    [SerializeField]
+    private Handle handleForward;
 
-    public Segment SegmentBack;
-    public Segment SegmentForward;
+    [SerializeField]
+    private Segment segmentBack;
+    [SerializeField]
+    private Segment segmentForward;
+
+    public Handle HandleBack { get => handleBack; set => handleBack = value; }
+    public Handle HandleForward { get => handleForward; set => handleForward = value; }
+    public Segment SegmentBack { get => segmentBack; set => segmentBack = value; }
+    public Segment SegmentForward { get => segmentForward; set => segmentForward = value; }
 
 
-    bool rerender = false;
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-
-
-        if(HandleBack != null)
-        Gizmos.DrawLine(transform.position, HandleBack.transform.position);
-
-        if(HandleForward != null)
-            Gizmos.DrawLine(transform.position, HandleForward.transform.position);
-
-    }
-
+    //assign handles
     public void SetHandle(GameObject handle, int dir=1)
     {
         if(dir==1)
@@ -40,14 +42,15 @@ public class Anchor : MonoBehaviour
         {
             Debug.LogError("This dir is invalid");
         }
+        
 
-
-
-        //set corrresponding dot
-        handle.GetComponent<Handle>().dot = this;
+        //set the handle to connect to the current anchor
+        handle.GetComponent<Handle>().Dot = this;
         handle.GetComponent<Handle>().RenderLine();
     }
 
+
+    //hides handles if exist
     public void ShowAnchors()
     {
         if (HandleBack != null)
@@ -61,7 +64,7 @@ public class Anchor : MonoBehaviour
         }
     }
 
-
+    //shows handles if exist
     public void HideAnchors()
     {
         if (HandleBack != null)
@@ -75,7 +78,7 @@ public class Anchor : MonoBehaviour
         }
     }
 
-
+    //destroy this anchor and all connected elements (handles and segments)
     public void Destroy()
     {
         if(SegmentBack !=null)
@@ -91,6 +94,8 @@ public class Anchor : MonoBehaviour
         Destroy(gameObject);
     }
 
+
+    //rerender bezier segment for handle h
     public void RenderBezierByHandle(Handle h)
     {
         if (h==HandleForward && SegmentForward!= null)
@@ -104,8 +109,11 @@ public class Anchor : MonoBehaviour
         }
     }
 
+
+    //update handles and segments upon moving anchor;
     public void UpdatePosition(Vector2 pos)
     {
+        //-1 makes the anchor be in front of the segments, but behind the handles
         transform.position = new Vector3(pos.x, pos.y, -1f);
 
         if (SegmentBack != null)
@@ -126,8 +134,5 @@ public class Anchor : MonoBehaviour
         {
             HandleBack.RenderLine();
         }
-
-
     }
-
 }

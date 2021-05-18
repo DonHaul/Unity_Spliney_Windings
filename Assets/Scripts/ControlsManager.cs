@@ -2,24 +2,28 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/// <summary>
+/// Defines commands and logic to edit the splines
+/// </summary>
 public class ControlsManager : MonoBehaviour
 {
-
+    //singleton
     public static ControlsManager instance;
 
 
-    // Start is called before the first frame update
 
     bool anchorsOn=true;
     bool splineCloseOn = false;
 
+    //flags
     public bool isCreating;
     public bool isHandling;
     public bool isMiddle;
     public bool isMirrored;
     public bool isMoving;
 
-
+    [SerializeField]
     Anchor activeAnchor;
 
     [SerializeField]
@@ -43,8 +47,7 @@ public class ControlsManager : MonoBehaviour
 
     public void Fill()
     {
-        //tries to fill interior is possible
-
+        //tries to fill interior if all conditions are met
         if(splineCloseOn)
         {
             MeshMaker.instance.Fill(SplineManager.instance.Dots);
@@ -52,13 +55,14 @@ public class ControlsManager : MonoBehaviour
 
     }
 
-
+    //empty everything
     public void CreateNew()
     {
         //generates a random spline
         SplineManager.instance.DeleteAnchors();
     }
 
+    //toggle hadles
     public void HideShowHandles()
     {
         anchorsOn = !anchorsOn;
@@ -87,8 +91,10 @@ public class ControlsManager : MonoBehaviour
         SplineManager.instance.ToggleSplineClose(splineCloseOn);
     }
 
-    // Update is called once per frame
 
+
+
+    // Used to detect keyboard and mouse input
     private void Update()
     {
 
@@ -99,17 +105,15 @@ public class ControlsManager : MonoBehaviour
             Random();
             MeshMaker.instance.TurnOffMesh();
         }
-        /*if (Input.GetKeyDown(KeyCode.Space))
-        {
-            //AutoAnchors();
-            SplineManager.instance.DrawBezier();
-        }*/
+
+        //new spline
         if (Input.GetKeyDown(KeyCode.N))
         {
             CreateNew();
             MeshMaker.instance.TurnOffMesh();
         }
 
+        //fill inside
         if (Input.GetKeyDown(KeyCode.F))
         {
             Fill();
@@ -121,88 +125,78 @@ public class ControlsManager : MonoBehaviour
             HideShowHandles();
         }
 
+        //toggle close or open loop
         if (Input.GetKeyDown(KeyCode.C))
         {
             ToggleCloseSpline();
+            MeshMaker.instance.TurnOffMesh();
         }
 
-        //create
+        //on left click down
         if (Input.GetMouseButtonDown(0))
         {
             MeshMaker.instance.TurnOffMesh();
+
+
             Collider2D col = Physics2D.OverlapPoint(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
 
+            //if pressing alt, on a handle, do a single handle move
             if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.LeftAlt))
             {
-                //CreateAnchor(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
-                //isCreating = true;
-                Debug.Log("Alt + Click");
-
-           
-
                 if(col!=null && col.tag=="Handle")
                 { 
-                Debug.Log(col);
-                isHandling = true;
+                    isHandling = true;
                     isMirrored = false;
-
+                    //set as active
                     activeHandle = col.gameObject.GetComponent<Handle>();
                 }
             }
             else
             {
-
-
-                
-                Debug.Log(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
-                Debug.Log(col);
+                //if normal click on handle, do a mirror move
                 if (col!=null && col.tag=="Handle")
                 {
 
-                        transform.position = Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition),new Vector3(1,1,0));
+                    transform.position = Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition),new Vector3(1,1,0));
 
                     isHandling = true;
                     isMirrored = true;
+                    //set as active
                     activeHandle = col.GetComponent<Handle>();
-                            /* RenderLine();
 
-                        dot.RenderBezierByHandle(this);*/
 
 
    
                 }
+                //if normal click on acnhor, drags it
                 else if (col != null && col.tag == "Dot")
                 {
-                    Debug.Log("Dot to Move");
                     isMoving = true;
                     activeAnchor = col.GetComponent<Anchor>();
 
-                   // SplineManager.instance.RemoveAnchor(col.GetComponent<Anchor>());
+
                 }
+                //if normal click on segment, add dot in there
                 else if (col != null && col.tag == "Segment")
                 {
-                    Debug.Log("Dot to Add");
                     SplineManager.instance.CreateAnchorAtSeg(col.gameObject.GetComponent<Segment>(), Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
 
                     isCreating = true;
                     isMiddle = true;
 
                 }
+                //if clicked in the empty space, add an anchor there
                 else
                 {
                     SplineManager.instance.CreateAnchor(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
                     isCreating = true;
                     isHandling = true;
-                    //handle movement is mirrored
                     isMirrored = true;
-
-                }
-
-
-
+                }               
             }
 
         }
+        //on right click on an anchor, delete it
         if (Input.GetMouseButtonDown(1))
         {
 
@@ -219,13 +213,12 @@ public class ControlsManager : MonoBehaviour
            
         }
 
-        //reset
+        //on left click up, reset flags
         if (Input.GetMouseButtonUp(0))
         {
             isCreating = false;
             isHandling = false;
             isMiddle = false;
-
             isMirrored = false;
 
             //activeHandle = null;
@@ -233,36 +226,33 @@ public class ControlsManager : MonoBehaviour
             activeAnchor = SplineManager.instance.Dots[SplineManager.instance.Dots.Count - 1];
         }
 
-        //drag after create
+        //actions while dragging left mouse
         if (Input.GetMouseButton(0))
         {
 
             MeshMaker.instance.TurnOffMesh();
 
+
+            //if handle, then drag handle
            if (isHandling && !isCreating)
             {
-
                 activeHandle.UpdatePosition(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)),isMirrored);
             }
-           
-
-
-             //after creating, it moves handles mirrored
+           //after creating, it moves handles mirrored
             if (isCreating)
             {
 
              if (isHandling)
             {
+                //move handle
                 activeAnchor.HandleForward.UpdatePosition(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)), isMirrored); ;
                
-            }
-
-                
+            }               
                 //if its an edge render only previous segment
                 activeAnchor.SegmentBack.RenderBezier();
 
 
-
+                //if is a point in the midle of a line, update the other segment
                 if (isMiddle)
                 {
                     if(activeAnchor!=null)
@@ -275,12 +265,11 @@ public class ControlsManager : MonoBehaviour
 
 
             }
-            //if moving the anchor
+            //else, drag the anchor
             else if (isMoving)
                 {
                     if (activeAnchor != null)
-                    {
-          
+                    {          
                         activeAnchor.UpdatePosition(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)));
                     }
                 }

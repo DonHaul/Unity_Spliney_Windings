@@ -2,18 +2,28 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
+/// <summary>
+/// This class contains the segment - each segment connects 2 anchors, defined as anchorforward and anchor backwards
+/// </summary>
 public class Segment : MonoBehaviour
 {
 
-    public Anchor anchorforward;
-    public Anchor anchorback;
+    [SerializeField]
+    private Anchor anchorforward;
+    [SerializeField]
+    private Anchor anchorback;
 
-    public LineRenderer lr;
-    public EdgeCollider2D ec;
+    LineRenderer lr;
+    EdgeCollider2D ec;
 
-    public Vector2[] v;
+    Vector2[] v;
 
+    public Anchor Anchorforward { get => anchorforward; set => anchorforward = value; }
+    public Anchor Anchorback { get => anchorback; set => anchorback = value; }
+    public Vector2[] V { get => v; set => v = value; }
+
+
+    //Setup segment and connected anchors
     public void SetSegment(Anchor back,Anchor forward)
     {
         anchorback= back;
@@ -31,52 +41,34 @@ public class Segment : MonoBehaviour
     }
 
 
-
+    //render bezier lines for this segment
     public void RenderBezier()
     {
-        
-
+        //how many intermediary points
         int resolution = SplineManager.instance.resolution;
 
-        v = new Vector2[resolution+1];
+        //setup vertices and output
+        V = new Vector2[resolution+1];
         Vector3[] v3 = new Vector3[resolution+1];
 
+        //set line render length
         lr.positionCount =  resolution + 1;
-        //ec.pointCount = resolution + 1;
 
+        //for each point in the interpolation
         for (int j = 0; j <= resolution; j++)
         {
 
-            /* lr.SetPosition(j, Bezier.BezierPoint(anchorback.transform.position, anchorforward.transform.position,
-                 anchorback.HandleForward.transform.position, anchorforward.HandleBack.transform.position, (float)j / resolution));*/
-            v[j]= Bezier.BezierPoint(anchorback.transform.position, anchorforward.transform.position,
+            //calculate the bezier using the anchors and the respective handles that control this segment
+            V[j]= Bezier.BezierPoint(anchorback.transform.position, anchorforward.transform.position,
             anchorback.HandleForward.transform.position, anchorforward.HandleBack.transform.position, (float)j / resolution);
-            v3[j] = v[j];
+            v3[j] = V[j];
         }
+
+        //update positions of line renderer
         lr.SetPositions(v3);
-        ec.points = v;
 
-    }
+        //update positions of linerenderer
+        ec.points = V;
 
-    public void SetupCollider()
-    {
-        /*Vector3[] p = new Vector3[lr.positionCount];
-        Vector2[] p2 = new Vector2[lr.positionCount];
-
-        lr.GetPositions(p);
-
-        for (int i = 0; i < lr.positionCount; i++)
-        {
-            Debug.Log(i);
-            Debug.Log(lr.GetPosition(i));
-            p2[i] = lr.GetPosition(i);//adding position to convert to global
-            Debug.Log(p2[i]);
-        }
-
-        
-
-        ec.points = (p2);
-
-        ec.edgeRadius = lr.startWidth;*/
     }
 }
