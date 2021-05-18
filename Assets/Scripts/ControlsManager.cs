@@ -183,6 +183,8 @@ public class ControlsManager : MonoBehaviour
 
                     isCreating = true;
                     isMiddle = true;
+                    isHandling = true;
+                    isMirrored = true;
 
                 }
                 //if clicked in the empty space, add an anchor there
@@ -245,7 +247,7 @@ public class ControlsManager : MonoBehaviour
              if (isHandling)
             {
                 //move handle
-                activeAnchor.HandleForward.UpdatePosition(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)), isMirrored); ;
+                activeAnchor.HandleForward.UpdatePosition(Vector3.Scale(Camera.main.ScreenToWorldPoint(Input.mousePosition), new Vector3(1, 1, 0)), isMirrored);
                
             }               
                 //if its an edge render only previous segment
